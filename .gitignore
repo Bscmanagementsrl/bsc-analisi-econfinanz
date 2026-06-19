@@ -1,0 +1,18 @@
+# Segreti — NON caricare su GitHub
+.streamlit/secrets.toml
+
+# Database locale
+data/bsc.db
+data/*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
