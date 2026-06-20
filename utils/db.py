@@ -73,7 +73,7 @@ def init_db():
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             submission_id   INTEGER NOT NULL REFERENCES submissions(id),
             description     TEXT,
-            category        TEXT,   -- codice categoria schema
+            category        TEXT,    -- codice categoria schema
             value           REAL,
             notes           TEXT
         )
@@ -108,7 +108,7 @@ def init_db():
     conn.close()
 
 
-# ─── Auth ──────────────────────────────────────────────────────────────────────
+# ─── Auth ────────────────────────────────────────────────────────────────────
 
 def _hash(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -151,7 +151,7 @@ def create_user(username, password, role, client_name, email):
         conn.commit()
         return True, "Utente creato"
     except sqlite3.IntegrityError:
-        return False, "Username gi à esistente"
+        return False, "Username già esistente"
     finally:
         conn.close()
 
@@ -318,4 +318,7 @@ def save_result(sub_id, result_json: str):
 def get_result(sub_id):
     conn = get_conn()
     row = conn.execute(
-        "SELECT * FROM analysis_results WHERE submission_id=?", (s
+        "SELECT * FROM analysis_results WHERE submission_id=?", (sub_id,)
+    ).fetchone()
+    conn.close()
+    return row
