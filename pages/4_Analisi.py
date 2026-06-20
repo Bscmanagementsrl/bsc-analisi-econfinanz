@@ -74,45 +74,47 @@ def main():
 
     # Aggiustamenti admin (schermata separata nella stessa pagina)
     st.markdown("---")
-    with st.expander("🔧 Aggiustamenti extracontabili (admin)", expanded=False):
-        st.caption("Inserisci qui le rettifiche da applicare prima dell'analisi (ratei stimati, accantonamenti, WDO, ecc.)")
+    is_admin = True  # la guardia in cima garantisce che siamo admin
+    if is_admin:
+        with st.expander("🔧 Aggiustamenti extracontabili (admin)", expanded=False):
+            st.caption("Inserisci qui le rettifiche da applicare prima dell'analisi (ratei stimati, accantonamenti, WDO, ecc.)")
 
-        from schema import SECTION_OPTIONS
-        all_cats = [("escludi", "— Seleziona categoria —")]
-        for sec, cats in SECTION_OPTIONS.items():
-            for code, label in cats:
-                all_cats.append((code, f"[{sec[:6]}] {label}"))
+            from schema import SECTION_OPTIONS
+            all_cats = [("escludi", "— Seleziona categoria —")]
+            for sec, cats in SECTION_OPTIONS.items():
+                for code, label in cats:
+                    all_cats.append((code, f"[{sec[:6]}] {label}"))
 
-        if "admin_adj" not in st.session_state:
-            # Pre-carica aggiustamenti già salvati
-            st.session_state["admin_adj"] = [
-                {"description": a["description"], "category": a["category"],
-                 "value": float(a["value"]), "notes": a["notes"]}
-                for a in adjs
-            ] or [{"description": "", "category": "escludi", "value": 0.0, "notes": ""}]
+            if "admin_adj" not in st.session_state:
+                # Pre-carica aggiustamenti già salvati
+                st.session_state["admin_adj"] = [
+                    {"description": a["description"], "category": a["category"],
+                     "value": float(a["value"]), "notes": a["notes"]}
+                    for a in adjs
+                ] or [{"description": "", "category": "escludi", "value": 0.0, "notes": ""}]
 
-        if st.button("➕ Aggiungi aggiustamento"):
-            st.session_state["admin_adj"].append(
-                {"description": "", "category": "escludi", "value": 0.0, "notes": ""}
-            )
+            if st.button("➕ Aggiungi aggiustamento"):
+                st.session_state["admin_adj"].append(
+                    {"description": "", "category": "escludi", "value": 0.0, "notes": ""}
+                )
 
-        new_adjs = []
-        for i, row in enumerate(st.session_state["admin_adj"]):
-            cols = st.columns([3, 3, 2, 3])
-            desc = cols[0].text_input("Descr.", value=row["description"], key=f"aadjd_{i}", label_visibility="collapsed" if i else "visible")
-            cat_idx = [c[0] for c in all_cats].index(row["category"]) if row["category"] in [c[0] for c in all_cats] else 0
-            cat  = cols[1].selectbox("Cat.", options=[c[0] for c in all_cats],
-                                     format_func=lambda x: dict(all_cats).get(x, x),
-                                     index=cat_idx, key=f"aadjc_{i}",
-                                     label_visibility="collapsed" if i else "visible")
-            val  = cols[2].number_input("Val.", value=float(row["value"]), key=f"aadjv_{i}",
-                                        label_visibility="collapsed" if i else "visible")
-            note = cols[3].text_input("Note", value=row["notes"], key=f"aadjn_{i}",
-                                      label_visibility="collapsed" if i else "visible")
-            new_adjs.append({"description": desc, "category": cat, "value": val, "notes": note})
+            new_adjs = []
+            for i, row in enumerate(st.session_state["admin_adj"]):
+                cols = st.columns([3, 3, 2, 3])
+                desc = cols[0].text_input("Descr.", value=row["description"], key=f"aadjd_{i}", label_visibility="collapsed" if i else "visible")
+                cat_idx = [c[0] for c in all_cats].index(row["category"]) if row["category"] in [c[0] for c in all_cats] else 0
+                cat  = cols[1].selectbox("Cat.", options=[c[0] for c in all_cats],
+                                         format_func=lambda x: dict(all_cats).get(x, x),
+                                         index=cat_idx, key=f"aadjc_{i}",
+                                         label_visibility="collapsed" if i else "visible")
+                val  = cols[2].number_input("Val.", value=float(row["value"]), key=f"aadjv_{i}",
+                                            label_visibility="collapsed" if i else "visible")
+                note = cols[3].text_input("Note", value=row["notes"], key=f"aadjn_{i}",
+                                          label_visibility="collapsed" if i else "visible")
+                new_adjs.append({"description": desc, "category": cat, "value": val, "notes": note})
 
-        st.session_state["admin_adj"] = new_adjs
-        all_adjs = [r for r in new_adjs if r["description"]]
+            st.session_state["admin_adj"] = new_adjs
+            all_adjs = [r for r in new_adjs if r["description"]]
     else:
         all_adjs = adjs
 
@@ -153,7 +155,7 @@ def main():
     with tab5:
         _render_indices(indices)
 
-    # ── KPIs box ────────────────────────────────────────────────────────
+    # ── KPIs box ─────────────────────────────────────────────────────────────
     st.markdown("---")
     st.markdown("### 🔑 Indicatori chiave")
     k1, k2, k3, k4 = st.columns(4)
@@ -273,7 +275,11 @@ def _render_indices(indices: list):
     st.markdown("---")
     st.markdown("**Tabella indici completa:**")
     df_idx = indices_to_dataframe(indices)
-    st.dataframe(df_idx, use_container_width=True)
+    if not df_idx.empty:
+        st.dataframe(df_idx, use_container_width=True)
 
+
+if __name__ == "__main__":
+    main()
 
 main()
