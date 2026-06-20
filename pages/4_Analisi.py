@@ -279,7 +279,4 @@ def _render_indices(indices: list):
         st.dataframe(df_idx, use_container_width=True)
 
 
-if __name__ == "__main__":
-    main()
-
 main()
